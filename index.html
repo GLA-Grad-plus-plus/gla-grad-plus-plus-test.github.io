@@ -66,9 +66,17 @@
          background-color: rgba(0,0,0,0.01);
          box-shadow: 0px 0px 1px rgba(0,0,0,1);
          }
-        .center {
-            text-align: center;
-        }
+         .center {
+         text-align: center;
+         }
+         table {
+         margin-left: auto;
+         margin-right: auto;
+         /*border-collapse: collapse; /* optional for cleaner borders */
+         }
+         /*table, th, td {
+         border: 1px solid black;
+         }*/
       </style>
    </head>
    <body>
@@ -154,8 +162,6 @@
       </table>
 
       <h2 id="random">III. Randomly-Selected Samples</h2>
-      <!-- For GLA-Grad++, we perform 4 iterations of the correction stage with 2 iterations of the classical diffusion process, as this is the number of that resulted in the overall best quality in terms of PESQ. Then we randomly select files for all the methods. -->
-      For GLA-Grad++, we perform four iterations of the correction stage, followed by two iterations of the classical diffusion process, as this configuration yielded the highest overall quality according to PESQ. Subsequently, we randomly select test files for all methods.
       <h3 id="random">1. LJSpeech</h3>
       <table class="audio-table">
         <thead>
