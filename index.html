@@ -1,0 +1,340 @@
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <title>GLA-Grad++: An Improved Griffin-Lim Guided Diffusion Model for Speech Synthesis</title>
+      <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+      <!-- <link rel="shortcut icon" href="../../images/taco.png"> -->
+      <script>
+         function play(path) {{
+           var player = document.getElementById('player');
+           player.src = path;
+           player.play();
+         }}
+      </script>
+      <style>
+         .audio-cell {
+         /* Center audio widgets in the table cell. */
+         text-align: center;
+         padding-bottom: 1px;
+         padding-top: 1px;
+         }
+         .audio-cell-padded {
+         text-align: center;
+         padding-bottom: 10px;
+         padding-top: 10px;
+         }
+         .audio-header {
+         /* Don't wrap header text. */
+         white-space: nowrap;
+         /* Some breaking space between headers for readability. */
+         padding-right: 5px;
+         padding-left: 5px;
+         }
+         .reference-cell {
+         /* For uniformity and to wrap long reference text, limit the reference cell's width. */
+         width: 25%;
+         padding-top: 20px;
+         padding-bottom: 20px;
+         }
+         .sample audio {
+         vertical-align: middle;
+         padding-left: 3px;
+         padding-right: 3px;
+         }
+         .round-button {
+         box-sizing: border-box;
+         display:block;
+         width:30px;
+         height:30px;
+         padding-top: 8px;
+         padding-left: 3px;
+         line-height: 6px;
+         border: 1.2px solid #000;
+         border-radius: 50%;
+         color: #000;
+         text-align:center;
+         background-color: rgba(0,0,0,0.00);
+         font-size:6px;
+         box-shadow: 0px 0px 2px rgba(0,0,0,1);
+         transition: all 0.2s ease;
+         }
+         .round-button:hover {
+         background-color: rgba(0,0,0,0.0);
+         box-shadow: 0px 0px 4px rgba(0,0,0,1);
+         }
+         .round-button:active {
+         background-color: rgba(0,0,0,0.01);
+         box-shadow: 0px 0px 1px rgba(0,0,0,1);
+         }
+        .center {
+            text-align: center;
+        }
+      </style>
+   </head>
+   <body>
+     <div class="main">
+       <article>
+         <header>
+            <h1>GLA-Grad++: An Improved Griffin-Lim Guided Diffusion Model for Speech Synthesis</h1>
+         </header>
+      </article>
+      <div>
+        <p>
+		        Teysir Baoueb, Xiaoyu Bie, Mathieu Fontaine, Gaël Richard
+		    </p>
+	<p>
+        [<a href="">Code</a> (coming soon) | <a href="">Paper</a>]
+        </p>
+      </div>
+      <div>
+      <p><b>Abstract:</b> Recent advances in diffusion models have positioned them as powerful generative frameworks for speech synthesis, demonstrating substantial improvements in audio quality and stability. Nevertheless, their effectiveness in vocoders conditioned on mel spectrograms remains constrained, particularly when the conditioning diverges from the training distribution. The recently proposed GLA-Grad model introduced a phase-aware extension to the WaveGrad vocoder that integrated the Griffin-Lim algorithm (GLA) into the reverse process to reduce inconsistencies between generated signals and conditioning mel spectrogram. In this paper, we further improve GLA-Grad through an innovative choice in how to apply the correction. Particularly, we compute the correction term only once, with a single application of GLA, to accelerate the generation process. Experimental results demonstrate that our method consistently outperforms the baseline models, particularly in out-of-domain scenarios.
+      </p>
+      <h3>
+        Contents
+      </h3>
+      <ul>
+        <li><a href="#illustration_generation_algorithm">I. Illustration of the Generation Algorithm</a></li>
+        <li><a href="#impact_timestep">II. Impact of the End Timestep of Stage 1</a></li>
+        <li><a href="#random">III. Randomly-Selected Samples</a></li>
+        <li><a href="#cherry">IV. Cherry-Picked Samples</a></li>
+        <li><a href="#references">References</a></li>
+      </ul>
+
+      <h2 id="illustration_generation_algorithm">I. Illustration of the Generation Algorithm</h2>
+      <div class="center">
+      <img src="animation.gif" alt="My Animation" width="600">
+      </div>
+
+      <h2 id="impact_timestep">II. Impact of the End Timestep of Stage 1</h2>
+      <table class="audio-table">
+        <thead>
+          <tr>
+            <th>Ground-Truth</th>
+            <th>0</th>
+            <th>1</th>
+            <th>2</th>
+            <th>3</th>
+            <th>4</th>
+            <th>5</th>
+            <th>6</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/GT/LJ016-0089.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/0/LJ016-0089.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/1/LJ016-0089.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/2/LJ016-0089.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/3/LJ016-0089.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/4/LJ016-0089.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/5/LJ016-0089.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/6/LJ016-0089.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/GT/p248_326.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/0/p248_326.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/1/p248_326.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/2/p248_326.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/3/p248_326.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/4/p248_326.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/5/p248_326.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/6/p248_326.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/GT/p335_045.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/0/p335_045.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/1/p335_045.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/2/p335_045.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/3/p335_045.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/4/p335_045.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/5/p335_045.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Steps/6/p335_045.wav" type="audio/wav"></audio></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="random">III. Randomly-Selected Samples</h2>
+      <!-- For GLA-Grad++, we perform 4 iterations of the correction stage with 2 iterations of the classical diffusion process, as this is the number of that resulted in the overall best quality in terms of PESQ. Then we randomly select files for all the methods. -->
+      For GLA-Grad++, we perform four iterations of the correction stage, followed by two iterations of the classical diffusion process, as this configuration yielded the highest overall quality according to PESQ. Subsequently, we randomly select test files for all methods.
+      <h3 id="random">1. LJSpeech</h3>
+      <table class="audio-table">
+        <thead>
+          <tr>
+            <!--<th style="width: 400px;">Text</th>-->
+            <th>Ground-Truth</th>
+            <th>WaveGrad</th>
+            <th>GLA-Grad</th>
+            <th>GLA-Grad++</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <!--<td><h7>approximately 30 to 45 seconds after Oswald's lunchroom encounter with Baker and Truly.|approximately thirty to forty-five seconds after Oswald's lunchroom encounter with Baker and Truly.</h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GT/LJ035-0162.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/WaveGrad/LJ035-0162.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GLA-Grad/LJ035-0162.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GLA-Grad++/LJ035-0162.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GT/LJ040-0119.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/WaveGrad/LJ040-0119.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GLA-Grad/LJ040-0119.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GLA-Grad++/LJ040-0119.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GT/LJ010-0293.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/WaveGrad/LJ010-0293.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GLA-Grad/LJ010-0293.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GLA-Grad++/LJ010-0293.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GT/LJ045-0204.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/WaveGrad/LJ045-0204.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GLA-Grad/LJ045-0204.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GLA-Grad++/LJ045-0204.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GT/LJ037-0222.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/WaveGrad/LJ037-0222.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GLA-Grad/LJ037-0222.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/LJSpeech/GLA-Grad++/LJ037-0222.wav" type="audio/wav"></audio></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="random">2. VCTK</h3>
+      <table class="audio-table">
+        <thead>
+          <tr>
+            <!--<th style="width: 400px;">Text</th>-->
+            <th>Ground-Truth</th>
+            <th>WaveGrad</th>
+            <th>GLA-Grad</th>
+            <th>GLA-Grad++</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GT/p226_278.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/WaveGrad/p226_278.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GLA-Grad/p226_278.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GLA-Grad++/p226_278.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GT/p227_253.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/WaveGrad/p227_253.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GLA-Grad/p227_253.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GLA-Grad++/p227_253.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GT/p294_357.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/WaveGrad/p294_357.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GLA-Grad/p294_357.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GLA-Grad++/p294_357.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GT/p314_328.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/WaveGrad/p314_328.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GLA-Grad/p314_328.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GLA-Grad++/p314_328.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GT/p335_199.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/WaveGrad/p335_199.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GLA-Grad/p335_199.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Random/VCTK/GLA-Grad++/p335_199.wav" type="audio/wav"></audio></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="cherry">IV. Cherry-Picked Samples</h2>
+            <h3 id="cherry">1. LJSpeech</h3>
+      <table class="audio-table">
+        <thead>
+          <tr>
+            <!--<th style="width: 400px;">Text</th>-->
+            <th>Ground-Truth</th>
+            <th>WaveGrad</th>
+            <th>GLA-Grad</th>
+            <th>GLA-Grad++</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/LJSpeech/GT/LJ014-0020.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/LJSpeech/WaveGrad/LJ014-0020.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/LJSpeech/GLA-Grad/LJ014-0020.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/LJSpeech/GLA-Grad++/LJ014-0020.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/LJSpeech/GT/LJ038-0052.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/LJSpeech/WaveGrad/LJ038-0052.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/LJSpeech/GLA-Grad/LJ038-0052.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/LJSpeech/GLA-Grad++/LJ038-0052.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/LJSpeech/GT/LJ033-0046.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/LJSpeech/WaveGrad/LJ033-0046.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/LJSpeech/GLA-Grad/LJ033-0046.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/LJSpeech/GLA-Grad++/LJ033-0046.wav" type="audio/wav"></audio></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 id="cherry">2. VCTK</h3>
+      <table class="audio-table">
+        <thead>
+          <tr>
+            <!--<th style="width: 400px;">Text</th>-->
+            <th>Ground-Truth</th>
+            <th>WaveGrad</th>
+            <th>GLA-Grad</th>
+            <th>GLA-Grad++</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/VCTK/GT/p314_149.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/VCTK/WaveGrad/p314_149.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/VCTK/GLA-Grad/p314_149.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/VCTK/GLA-Grad++/p314_149.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/VCTK/GT/p294_056.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/VCTK/WaveGrad/p294_056.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/VCTK/GLA-Grad/p294_056.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/VCTK/GLA-Grad++/p294_056.wav" type="audio/wav"></audio></td>
+          </tr>
+          <tr>
+            <!--<td><h7></h7></td> -->
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/VCTK/GT/p241_017.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/VCTK/WaveGrad/p241_017.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/VCTK/GLA-Grad/p241_017.wav" type="audio/wav"></audio></td>
+            <td><audio controls style="width: 150px; height: 50px"><source src="Samples/Cherry/VCTK/GLA-Grad++/p241_017.wav" type="audio/wav"></audio></td>
+          </tr>
+
+        </tbody>
+      </table>
+
+  <h3 id="references">References</h3>
+         <p>
+         [1] Haocheng Liu, Teysir Baoueb, Mathieu Fontaine, Jonathan Le Roux, and Gaël Richard, “Gla-grad: A griffin-lim extended waveform generation diffusion model,” in Proc. ICASSP, 2024.<br>
+         [2] Nanxin Chen, Yu Zhang, Heiga Zen, Ron J Weiss, Mohammad Norouzi, and William Chan, “Wavegrad: Estimating gradients for waveform generation,” in Proc. ICLR, 2020.
+         </p>
+      </div>
+   </body>
+</html>
